@@ -1,4 +1,7 @@
+using Microsoft.EntityFrameworkCore;
 using SteamAPI.Context;
+using SteamAPI.Interfaces;
+using SteamAPI.Repositories;
 
 namespace SteamAPI
 {
@@ -15,13 +18,23 @@ namespace SteamAPI
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            var postgresEndpoint = builder.Configuration["postgres_endpoint"];
-            var postgresPort = builder.Configuration["postgres_port"];
-            var postgresDB = builder.Configuration["postgres_database"];
-            var postgresUser = builder.Configuration["postgres_user"];
-            var postgresPass = builder.Configuration["postgres_pass"];
+            #region Conexao In Memory database
 
-            builder.Services.AddNpgsql<PostgresContext>($"Host={postgresEndpoint};Port={postgresPort};Database={postgresDB};Username={postgresUser};Password={postgresPass}");
+            builder.Services.AddDbContext<InMemoryContext>(options => options.UseInMemoryDatabase("Steam"));
+
+            #endregion
+
+            #region Injecao de dependencia do Repository
+
+            builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+            
+            #endregion
+
+            #region Registra o Data Generator
+            
+            builder.Services.AddTransient<DataGenerator>();
+            
+            #endregion
 
             var app = builder.Build();
 
@@ -38,6 +51,15 @@ namespace SteamAPI
 
 
             app.MapControllers();
+
+            #region Popula o banco de dados
+            var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
+            using (var scope = scopedFactory.CreateScope())
+            {
+                var service = scope.ServiceProvider.GetService<DataGenerator>();
+                service.Generate();
+            }
+            #endregion
 
             app.Run();
         }
