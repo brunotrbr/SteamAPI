@@ -15,6 +15,7 @@ namespace SteamAPI.Controllers
 
         public GamesController(IBaseRepository<Games> repository)
         {
+            _logger = logger;
             _repository = repository;
         }
 
@@ -43,9 +44,9 @@ namespace SteamAPI.Controllers
         {
             var game = await _repository.GetByKey(id);
             if(game == null)
-            {
+        {
                 return NotFound("Id Inexistente");
-            }
+        }
             return Ok(game);
         }
 
@@ -63,11 +64,29 @@ namespace SteamAPI.Controllers
                 var inserted = await _repository.Insert(entity);
                 return Created(string.Empty, inserted);
             }
+
             databaseGames = UpdateGamesModel(databaseGames, entity);
-            
+
             var updated = await _repository.Update(id, databaseGames);
+
             return Ok(updated);
         }
 
+        // DELETE <GamesController>/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var databaseGames = await _repository.GetByKey(id);
+
+            if (databaseGames == null)
+            {
+                var error = "Id inexistente.";
+                return NotFound(error);
+            }
+
+            var deleted = await _repository.Delete(id);
+
+            return Ok(deleted);
+        }
     }
 }
