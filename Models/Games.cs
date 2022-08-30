@@ -1,28 +1,35 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace SteamAPI.Models
 {
     public class Games
     {
 		[Key]
+        [JsonPropertyName("id")]
 		public int Id { get; set; }
-		public int AppId { get; set; }
-		public string Name { get; set; }
-		public DateTime ReleaseDate { get; set; }
-		public bool English { get; set; }
-		public string Developer { get; set; }
-		public string Publisher { get; set; }
-		public Platforms Platforms { get; set; }
-		public int RequiredAge { get; set; }
-		public Categories Categories { get; set; }
-		public Genres Genres { get; set; }
-		public SteamspyTags SteamspyTags { get; set; }
-		public int Achievements { get; set; }
-		public int PositiveRatings { get; set; }
-		public int NegativeRatings { get; set; }
-		public int AveragePlaytime { get; set; }
-		public int MedianPlaytime { get; set; }
-		public string Owners { get; set; }
-		public decimal Price { get; set; }
-	}
+        [JsonPropertyName("appid")]
+        public int AppId { get; set; }
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+        [JsonPropertyName("developer")]
+        public string Developer { get; set; }
+		[JsonPropertyName("platforms")]
+        public string Platforms { get; set; }
+		[JsonPropertyName("categories")]
+        public string Categories { get; set; }
+		[JsonPropertyName("genres")]
+        public string Genres { get; set; }
+
+        public Games(int id, int appId, string name, string developer, string platforms, string categories, string genres)
+        {
+            Id = id;
+            AppId = appId;
+            Name = name;
+            Developer = developer;
+            Platforms = platforms;
+            Categories = categories;
+            Genres = genres;
+        }
+    }
 }
