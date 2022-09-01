@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SteamAPI.Context;
+using SteamAPI.Filters;
 using SteamAPI.Interfaces;
 using SteamAPI.Repositories;
 
@@ -10,11 +11,13 @@ namespace SteamAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            
-            
+
+
             // Add services to the container.
 
             builder.Services.AddControllers();
+            builder.Services.AddControllers(options =>
+                options.Filters.Add(typeof(CustomActionFilterGlobal)));
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
