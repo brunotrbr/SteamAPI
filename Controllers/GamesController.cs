@@ -41,7 +41,6 @@ namespace SteamAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        [ShortCircuitFilter]
         [ProducesResponseType(typeof(Games), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Get([FromRoute] int id)

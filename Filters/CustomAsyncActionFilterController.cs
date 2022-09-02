@@ -6,11 +6,11 @@ namespace SteamAPI.Filters
     {
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            Console.WriteLine("async in");
+            Console.WriteLine("Action Filter na Controller, executado antes da chamada do método (antes do next)");
 
             await next();
 
-            Console.WriteLine("async out");
+            Console.WriteLine("Action Filter na Controller, executado depois da chamada do método (depois do next)");
         }
     }
 }
