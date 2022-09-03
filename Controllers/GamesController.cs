@@ -5,6 +5,7 @@ using SteamAPI.Interfaces;
 using SteamAPI.Models;
 using SteamAPI.Repositories;
 using System.Net.Mime;
+using System.Text.Json;
 
 namespace SteamAPI.Controllers
 {
@@ -15,10 +16,12 @@ namespace SteamAPI.Controllers
     {
 
         private readonly IBaseRepository<Games> _repository;
+        private readonly ILogger<GamesController> _logger;
 
-        public GamesController(IBaseRepository<Games> repository)
+        public GamesController(IBaseRepository<Games> repository, ILogger<GamesController> logger)
         {
             _repository = repository;
+            _logger = logger;
         }
 
         private Games UpdateGamesModel(Games newData, GamesDto entity)
@@ -36,6 +39,7 @@ namespace SteamAPI.Controllers
         [CustomActionFilterEndpoint]
         public async Task<IActionResult> Get([FromQuery] int page, int maxResults)
         {
+            throw new Exception($"Falha de comunicação com o Banco de Dados. Stack Trace: {Environment.StackTrace}");
             var games = await _repository.Get(page, maxResults);
             return Ok(games);
         }
@@ -46,8 +50,13 @@ namespace SteamAPI.Controllers
         public async Task<IActionResult> Get([FromRoute] int id)
         {
             var game = await _repository.GetByKey(id);
+            ////Consultar quantas vezes o game foi baixado
+            //// Chamar api externa, passando o ID
+            //// Vai dar null reference exception
+            //var apiExternaIdDoGame = game.Id;
             if (game == null)
             {
+                Console.WriteLine(game.Id);
                 return NotFound("Id Inexistente");
             }
             return Ok(game);
@@ -93,10 +102,14 @@ namespace SteamAPI.Controllers
             {
                 return NoContent();
             }
-
+            //_logger.Log(LogLevel.Information, $"Antes do update {JsonSerializer.Serialize(databaseGames)}. Data da atualização: {DateTime.Now.ToString("G")}");
+            _logger.LogInformation($"Antes do update {JsonSerializer.Serialize(databaseGames)}. Data da atualização: {DateTime.Now.ToString("G")}");
             databaseGames.Platforms = entity.Platforms;
-
             var updated = await _repository.Update(id, databaseGames);
+            // Comunicação com o sistema externo
+            // Nessa comunicação, da erro. 
+            //_logger.Log(LogLevel.Information, $"Depois do update {JsonSerializer.Serialize(updated)}. Data da atualização: {DateTime.Now.ToString("G")}");
+            _logger.LogInformation($"Depois do update {JsonSerializer.Serialize(databaseGames)}. Data da atualização: {DateTime.Now.ToString("G")}");
             return Ok(updated);
         }
 
@@ -120,7 +133,14 @@ namespace SteamAPI.Controllers
             var game = await _repository.GetByKey(id);
             if (game == null)
             {
-                return NotFound("Id Inexistente");
+                throw new KeyNotFoundException($"Id: {id}");
+                // Gambiarra pra retornar mensagem no NoContent
+                //return Ok(new
+                //{
+                //    message = "Gambiarra pra retornar mensagem no NoContent",
+                //    StatusCode = StatusCodes.Status204NoContent
+                //});
+                //return NotFound("Id Inexistente");
             }
             return Ok(game);
         }

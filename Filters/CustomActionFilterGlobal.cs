@@ -6,12 +6,12 @@ namespace SteamAPI.Filters
     {
         public void OnActionExecuted(ActionExecutedContext context)
         {
-            Console.WriteLine("Action Filter Global, executado depois da chamada do método (OnActionExecuted)");
+            //Console.WriteLine("Action Filter Global, executado depois da chamada do método (OnActionExecuted)");
         }
 
         public void OnActionExecuting(ActionExecutingContext context)
         {
-            Console.WriteLine("Action Filter Global, executado antes da chamada do método (OnActionExecuting)");
+            //Console.WriteLine("Action Filter Global, executado antes da chamada do método (OnActionExecuting)");
         }
     }
 }
