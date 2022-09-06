@@ -19,7 +19,11 @@ namespace SteamAPI
             builder.Services.AddControllers(options =>
                 options.Filters.Add(typeof(CustomActionFilterGlobal)));
             builder.Services.AddControllers(options => 
-            options.Filters.Add(typeof(CustomExceptionFilter)));
+                options.Filters.Add(typeof(CustomExceptionFilter)));
+            builder.Services.AddControllers(options => options.Filters.Add(typeof(CustomLogsFilter)));
+            //builder.Services.AddControllers(options => options.Filters.Add(typeof(AuthorizationFilter)));
+
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

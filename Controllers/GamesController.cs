@@ -12,7 +12,7 @@ namespace SteamAPI.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [CustomAsyncActionFilterController]
-    public class GamesController : ControllerBase
+    public class GamesController : ControllerBase, IBaseController<Games, GamesDto, GamesPatchDto>
     {
 
         private readonly IBaseRepository<Games> _repository;
@@ -25,7 +25,7 @@ namespace SteamAPI.Controllers
         }
 
         private Games UpdateGamesModel(Games newData, GamesDto entity)
-        {
+        { // AutoMapper
             newData.AppId = entity.AppId;
             newData.Name = entity.Name;
             newData.Developer = entity.Developer;
@@ -36,11 +36,13 @@ namespace SteamAPI.Controllers
         }
 
         [HttpGet]
+        [CookiesFilter]
         [CustomActionFilterEndpoint]
         public async Task<IActionResult> Get([FromQuery] int page, int maxResults)
         {
-            throw new Exception($"Falha de comunicação com o Banco de Dados. Stack Trace: {Environment.StackTrace}");
+            //throw new Exception($"Falha de comunicação com o Banco de Dados. Stack Trace: {Environment.StackTrace}");
             var games = await _repository.Get(page, maxResults);
+            Response.Cookies.Append("authToken", "123");
             return Ok(games);
         }
 
@@ -80,12 +82,13 @@ namespace SteamAPI.Controllers
 
             databaseGames = UpdateGamesModel(databaseGames, entity);
 
-            var updated = await _repository.Update(id, databaseGames);
+            var updated = await _repository.Update(databaseGames);
 
             return Ok(updated);
         }
 
         [HttpPost]
+        [AuthorizationFilter]
         public async Task<IActionResult> Post([FromBody] GamesDto entity)
         {
             var gameToInsert = new Games(id: 0, entity.AppId, entity.Name, entity.Developer, entity.Platforms, genres: entity.Genres, categories: entity.Categories); // DAO
@@ -103,13 +106,13 @@ namespace SteamAPI.Controllers
                 return NoContent();
             }
             //_logger.Log(LogLevel.Information, $"Antes do update {JsonSerializer.Serialize(databaseGames)}. Data da atualização: {DateTime.Now.ToString("G")}");
-            _logger.LogInformation($"Antes do update {JsonSerializer.Serialize(databaseGames)}. Data da atualização: {DateTime.Now.ToString("G")}");
+            //_logger.LogInformation($"Antes do update {JsonSerializer.Serialize(databaseGames)}. Data da atualização: {DateTime.Now.ToString("G")}");
             databaseGames.Platforms = entity.Platforms;
-            var updated = await _repository.Update(id, databaseGames);
+            var updated = await _repository.Update(databaseGames);
             // Comunicação com o sistema externo
             // Nessa comunicação, da erro. 
             //_logger.Log(LogLevel.Information, $"Depois do update {JsonSerializer.Serialize(updated)}. Data da atualização: {DateTime.Now.ToString("G")}");
-            _logger.LogInformation($"Depois do update {JsonSerializer.Serialize(databaseGames)}. Data da atualização: {DateTime.Now.ToString("G")}");
+            //_logger.LogInformation($"Depois do update {JsonSerializer.Serialize(databaseGames)}. Data da atualização: {DateTime.Now.ToString("G")}");
             return Ok(updated);
         }
 
@@ -133,14 +136,14 @@ namespace SteamAPI.Controllers
             var game = await _repository.GetByKey(id);
             if (game == null)
             {
-                throw new KeyNotFoundException($"Id: {id}");
+                //throw new KeyNotFoundException($"Id: {id}");
                 // Gambiarra pra retornar mensagem no NoContent
                 //return Ok(new
                 //{
                 //    message = "Gambiarra pra retornar mensagem no NoContent",
                 //    StatusCode = StatusCodes.Status204NoContent
                 //});
-                //return NotFound("Id Inexistente");
+                return NotFound("Id Inexistente");
             }
             return Ok(game);
         }

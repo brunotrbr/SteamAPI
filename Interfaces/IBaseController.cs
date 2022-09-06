@@ -3,17 +3,17 @@ using System.Linq;
 
 namespace SteamAPI.Interfaces
 {
-    public interface IBaseController<T>
+    public interface IBaseController<T, K, D>
     {
-        Task<IActionResult> Get();
+        Task<IActionResult> Get(int page, int maxResults);
 
-        Task<IActionResult> GetByKey(int key);
+        Task<IActionResult> Get(int key);
 
-        Task<IActionResult> Post(T entity);
+        Task<IActionResult> Post(K entity);
 
-        Task<IActionResult> Put(int key, T entity);
+        Task<IActionResult> Put(int key, K entity);
 
-        Task<IActionResult> Patch(int key, T entity);
+        Task<IActionResult> Patch(int key, D entity);
 
         Task<IActionResult> Delete(int key);
     }

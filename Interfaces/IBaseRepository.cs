@@ -8,7 +8,7 @@
 
         Task<T> Insert(T entity);
 
-        Task<T> Update(int key, T entity);
+        Task<T> Update(T entity);
 
         Task<int> Delete(int key);
     }

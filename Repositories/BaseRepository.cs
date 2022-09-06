@@ -57,7 +57,7 @@ namespace SteamAPI.Repositories
             });
         }
 
-        public Task<T> Update(int key, T entity)
+        public Task<T> Update(T entity)
         {
             return Task.Run(() =>
             {
