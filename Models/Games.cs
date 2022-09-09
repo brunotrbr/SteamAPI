@@ -31,5 +31,10 @@ namespace SteamAPI.Models
             Categories = categories;
             Genres = genres;
         }
+
+        public Games clone()
+        {
+            return (Games)this.MemberwiseClone(); // Shallow Clone
+        }
     }
 }

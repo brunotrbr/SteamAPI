@@ -10,6 +10,7 @@ namespace SteamAPI.Context
         }
 
         public DbSet<Games> Games { get; set; }
+        public DbSet<Users> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

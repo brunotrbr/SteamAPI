@@ -17,11 +17,13 @@ namespace SteamAPI.Controllers
 
         private readonly IBaseRepository<Games> _repository;
         private readonly ILogger<GamesController> _logger;
+        private readonly IConfiguration _configuration;
 
-        public GamesController(IBaseRepository<Games> repository, ILogger<GamesController> logger)
+        public GamesController(IBaseRepository<Games> repository, ILogger<GamesController> logger, IConfiguration configuration)
         {
             _repository = repository;
             _logger = logger;
+            _configuration = configuration;
         }
 
         private Games UpdateGamesModel(Games newData, GamesDto entity)
@@ -40,6 +42,8 @@ namespace SteamAPI.Controllers
         [CustomActionFilterEndpoint]
         public async Task<IActionResult> Get([FromQuery] int page, int maxResults)
         {
+            var apikey = _configuration.GetValue<string>("AppInsightsIntrumentatioKey");
+            Console.WriteLine(apikey);
             //throw new Exception($"Falha de comunicação com o Banco de Dados. Stack Trace: {Environment.StackTrace}");
             var games = await _repository.Get(page, maxResults);
             Response.Cookies.Append("authToken", "123");

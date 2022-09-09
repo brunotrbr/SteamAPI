@@ -2,6 +2,7 @@
 using SteamAPI.Interfaces;
 using SteamAPI.Logs;
 using SteamAPI.Models;
+using SteamAPI.Utils;
 
 namespace SteamAPI.Filters
 {
@@ -34,7 +35,9 @@ namespace SteamAPI.Filters
                         var game = _repository.GetByKey(id).Result;
                         if (game != null)
                         {
-                            _contextDict.Add(id, game);
+                            //var gameClone = CloneService.Clone<Games>(game); // Deep Clone
+                            var gameClone = game.clone(); // Shallow Clone
+                            _contextDict.Add(id, gameClone);
                         }
                     }
                 }
@@ -53,16 +56,17 @@ namespace SteamAPI.Filters
             //            || context.HttpContext.Request.Method.Equals("patch", StringComparison.InvariantCultureIgnoreCase))
             //        {
             //            var afterUpdate = _repository.GetByKey(id).Result;
-            //            if(afterUpdate != null)
+            //            if (afterUpdate != null)
             //            {
             //                Games beforeUpdate;
-            //                if(_contextDict.TryGetValue(id, out beforeUpdate))
+            //                if (_contextDict.TryGetValue(id, out beforeUpdate))
             //                {
             //                    CustomLogs.SaveLog(afterUpdate.Id, "Game", afterUpdate.Name, context.HttpContext.Request.Method, beforeUpdate, afterUpdate);
             //                    _contextDict.Remove(id);
             //                }
             //            }
-            //        } else if (context.HttpContext.Request.Method.Equals("delete", StringComparison.InvariantCultureIgnoreCase))
+            //        }
+            //        else if (context.HttpContext.Request.Method.Equals("delete", StringComparison.InvariantCultureIgnoreCase))
             //        {
             //            Games beforeUpdate;
             //            if (_contextDict.TryGetValue(id, out beforeUpdate))

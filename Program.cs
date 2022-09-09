@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using SteamAPI.AuthorizationAndAuthentication;
 using SteamAPI.Context;
 using SteamAPI.Filters;
 using SteamAPI.Interfaces;
@@ -14,15 +17,13 @@ namespace SteamAPI
 
 
             // Add services to the container.
-
-            builder.Services.AddControllers();
             builder.Services.AddControllers(options =>
-                options.Filters.Add(typeof(CustomActionFilterGlobal)));
-            builder.Services.AddControllers(options => 
-                options.Filters.Add(typeof(CustomExceptionFilter)));
-            builder.Services.AddControllers(options => options.Filters.Add(typeof(CustomLogsFilter)));
-            //builder.Services.AddControllers(options => options.Filters.Add(typeof(AuthorizationFilter)));
-
+            {
+                options.Filters.Add(typeof(CustomActionFilterGlobal));
+                options.Filters.Add(typeof(CustomExceptionFilter));
+                options.Filters.Add(typeof(CustomLogsFilter));
+                //options.Filters.Add(typeof(AuthorizationFilter));
+            });
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -35,15 +36,24 @@ namespace SteamAPI
             #endregion
 
             #region Injecao de dependencia do Repository
-            
+
             builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
-            
+            builder.Services.AddScoped(typeof(IUsersRepository), typeof(UsersRepository));
+
+            #endregion
+
+            #region Injeção de dependência do JWT Token
+            var tokenConfiguration = new TokenConfiguration();
+            new ConfigureFromConfigurationOptions<TokenConfiguration>(builder.Configuration.GetSection("TokenConfiguration")).Configure(tokenConfiguration);
+            builder.Services.AddSingleton(tokenConfiguration);
+            var generateToken = new GenerateToken(tokenConfiguration);
+            builder.Services.AddScoped(typeof(GenerateToken));
             #endregion
 
             #region Registra o Data Generator
-            
+
             builder.Services.AddTransient<DataGenerator>();
-            
+
             #endregion
 
             var app = builder.Build();
