@@ -18,6 +18,11 @@ namespace SteamAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddCors(cors => cors.AddPolicy("AllowOriginAndMethod", options => options
+                // .WithOrigins(new[] { "*" }) // libera pra todos os domínios
+                .WithOrigins(new[] { "https://objectstorage.us-ashburn-1.oraclecloud.com" })
+                .WithMethods(new[] { "GET", "DELETE" })
+                ));
 
             // Add services to the container.
             builder.Services.AddControllers(options =>
@@ -114,6 +119,8 @@ namespace SteamAPI
             }
 
             // app.UseHttpsRedirection();
+
+            app.UseCors("AllowOriginAndMethod");
 
             app.UseAuthentication();
             app.UseAuthorization();
