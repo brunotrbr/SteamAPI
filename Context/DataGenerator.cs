@@ -13,8 +13,8 @@ namespace SteamAPI.Context
         public DataGenerator(InMemoryContext inMemoryContext)
         {
             _inMemoryContext = inMemoryContext;
-            _listNames = new List<string>() { "Bernardo", "José", "Washington", "Cleiton", "Cleyton", "Romário", "Maria", "Mariele", "Jussara", "Zoraide", };
-            _listRoles = new List<string>() { "Master", "Manager", "Guest", "Developer", "Junior" };
+            _listNames = new List<string>() { "Caio", "Holly", "Rubens", "Dora", "Gabriel", "Amanda", "Lucas", "Ana", "Summer", "Logan" };
+            _listRoles = new List<string>() { "Master", "Admin", "Analyst", "Manager", "Guest" };
         }
 
         public void Generate()
@@ -34,21 +34,18 @@ namespace SteamAPI.Context
 
             if (!_inMemoryContext.Users.Any())
             {
-                List<Users> items = new List<Users>();
+                List<Users> users = new List<Users>();
                 var random = new Random();
 
-                for(int i = 0; i < 10; i++)
+                for (int i = 0; i < 10; i++)
                 {
                     var name = $"{_listNames.ElementAt(random.Next(_listNames.Count))} {_listNames.ElementAt(random.Next(_listNames.Count))}";
                     var username = name.Replace(" ", "");
-                    Users user = new Users();
-                    user.Name = name;
-                    user.Password = $"{username}{i}";
-                    user.Username = username;
-                    user.Role = $"{_listRoles.ElementAt(random.Next(_listRoles.Count))}";
-                    items.Add(user);
+                    Users customer = new Users(name, username, $"{username}{i}", _listRoles[random.Next(_listRoles.Count)]);
+                    users.Add(customer);
                 }
-                _inMemoryContext.Users.AddRange(items);
+
+                _inMemoryContext.Users.AddRange(users);
                 _inMemoryContext.SaveChanges();
             }
         }

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using SteamAPI.AuthorizationAndAuthentication;
+using SteamAPI.Authentication;
 using SteamAPI.Context;
 using SteamAPI.Filters;
 using SteamAPI.Interfaces;
@@ -20,6 +20,8 @@ namespace SteamAPI
 
 
             // Add services to the container.
+
+            builder.Services.AddControllers();
             builder.Services.AddControllers(options =>
             {
                 options.Filters.Add(typeof(CustomActionFilterGlobal));
@@ -31,32 +33,32 @@ namespace SteamAPI
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(option =>
-            {
-                option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    In = ParameterLocation.Header,
-                    Description = "Informe o token",
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.Http,
-                    BearerFormat = "JWT",
-                    Scheme = "bearer"
-                });
-                option.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
+                    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                     {
-                        new OpenApiSecurityScheme
+                        In = ParameterLocation.Header,
+                        Description = "Informe o token",
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.Http,
+                        BearerFormat = "JWT",
+                        Scheme = "bearer"
+                    });
+                    option.AddSecurityRequirement(new OpenApiSecurityRequirement
+                    {
                         {
-                            Reference = new OpenApiReference
+                            new OpenApiSecurityScheme
                             {
-                                Type=ReferenceType.SecurityScheme,
-                                Id="Bearer"
-                            }
-                        },
-                        new string[]{}
-                    }
+                                Reference = new OpenApiReference
+                                {
+                                    Type=ReferenceType.SecurityScheme,
+                                    Id="Bearer"
+                                }
+                            },
+                            new string[]{}
+                        }
 
+                    });
                 });
-            });
 
             #region Conexao In Memory database
 
@@ -71,19 +73,31 @@ namespace SteamAPI
 
             #endregion
 
-            #region Injeção de dependência do JWT Token
-            var tokenConfiguration = new TokenConfiguration();
-            new ConfigureFromConfigurationOptions<TokenConfiguration>(builder.Configuration.GetSection("TokenConfiguration")).Configure(tokenConfiguration);
-            builder.Services.AddSingleton(tokenConfiguration);
-            var generateToken = new GenerateToken(tokenConfiguration);
-            builder.Services.AddScoped(typeof(GenerateToken));
+            #region Registra o Data Generator
+
+            builder.Services.AddTransient<DataGenerator>();
+
             #endregion
 
+            #region Injeção de dependência do JWT Token
+            var tokenConfiguration = new TokenConfiguration();
+            new ConfigureFromConfigurationOptions<TokenConfiguration>(builder.Configuration.GetSection("TokenConfigurations"))
+                .Configure(tokenConfiguration);
+
+            builder.Services.AddSingleton(tokenConfiguration);
+            var tokenService = new TokenService(tokenConfiguration);
+            builder.Services.AddScoped(typeof(TokenService));
+            #endregion
+
+            #region Definimos que vamos utilizar o JWT para autenticação
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(options =>
+
+            })
+                // Agora vamos configurar ele
+                .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters()
                 {
@@ -98,9 +112,6 @@ namespace SteamAPI
                 };
             });
 
-            #region Registra o Data Generator
-
-            builder.Services.AddTransient<DataGenerator>();
 
             #endregion
 
@@ -114,7 +125,6 @@ namespace SteamAPI
             }
 
             // app.UseHttpsRedirection();
-
             app.UseAuthentication();
             app.UseAuthorization();
 
