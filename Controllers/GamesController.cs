@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SteamAPI.Dto;
 using SteamAPI.Filters;
 using SteamAPI.Interfaces;
@@ -40,6 +41,7 @@ namespace SteamAPI.Controllers
         [HttpGet]
         [CookiesFilter]
         [CustomActionFilterEndpoint]
+        [Authorize("ValidateClaimModule")]
         public async Task<IActionResult> Get([FromQuery] int page, int maxResults)
         {
             var apikey = _configuration.GetValue<string>("AppInsightsIntrumentatioKey");
@@ -98,6 +100,14 @@ namespace SteamAPI.Controllers
             var gameToInsert = new Games(id: 0, entity.AppId, entity.Name, entity.Developer, entity.Platforms, genres: entity.Genres, categories: entity.Categories); // DAO
             var inserted = await _repository.Insert(gameToInsert);
             return Created(string.Empty, inserted);
+        }
+
+        [HttpPost("busca")]
+        public async Task<IActionResult> Post2([FromBody] GamesDto entity)
+        {
+            var result = _repository.Get(1, 10).Result;
+            var filtered = result.Where(item => item.AppId > entity.AppId);
+            return Ok(filtered);
         }
 
         [HttpPatch("{id}")]

@@ -103,6 +103,8 @@ namespace SteamAPI
                 };
             });
 
+            builder.Services.AddAuthorization(options => options.AddPolicy("ValidateClaimModule", policy => policy.RequireClaim("module", "teste")));
+
             #region Registra o Data Generator
 
             builder.Services.AddTransient<DataGenerator>();

@@ -21,9 +21,11 @@ namespace SteamAPI.AuthorizationAndAuthentication
 
             var nameClaim = new Claim(ClaimTypes.Name, user.Username);
             var roleClaim = new Claim(ClaimTypes.Role, user.Role);
+            var moduleClaim = new Claim("module", "teste");
             List<Claim> claims = new List<Claim>();
             claims.Add(nameClaim);
             claims.Add(roleClaim);
+            claims.Add(moduleClaim);
 
             var jwtToken = new JwtSecurityToken(
                 issuer: _configuration.Issuer,
